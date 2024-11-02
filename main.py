@@ -22,12 +22,11 @@ class SystemMonitor:
         cpu_btn = tk.Button(btn_frame,text="Show CPU Information", command=self.show_cpu_info)
         cpu_btn.pack(anchor='w',pady=(40,10),padx=10)
 
-        cpu_btn = tk.Button(btn_frame,text="Show RAM Information", command=self.show_cpu_info)
-        cpu_btn.pack(anchor='w',pady=(40,10),padx=10)
+        ram_btn = tk.Button(btn_frame,text="Show RAM Information", command=self.show_cpu_info)
+        ram_btn.pack(anchor='w',pady=(40,10),padx=10)
 
-        cpu_btn = tk.Button(btn_frame,text="Show Disk Information", command=self.show_cpu_info)
-        cpu_btn.pack(anchor='w',pady=(40,10),padx=10)
-
+        disk_btn = tk.Button(btn_frame,text="Show Disk Information", command=self.show_cpu_info)
+        disk_btn.pack(anchor='w',pady=(40,10),padx=10)
 
         root.mainloop()
 
@@ -40,7 +39,6 @@ class SystemMonitor:
 
     def show_disk_info(e):
         pass    
-
 
 obj = SystemMonitor()
 
