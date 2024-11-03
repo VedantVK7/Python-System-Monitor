@@ -4,8 +4,6 @@ import tkinter as tk
 import threading
 from tkinter import ttk
 
-
-
 class SystemMonitor:
     def __init__(self) -> None:
 
@@ -20,9 +18,6 @@ class SystemMonitor:
                     cpu_usage = psutil.cpu_percent()
                     cpu_usage_progress["value"] = cpu_usage
                     cpu_usage_label.config(text=f'CPU Usage : {cpu_usage}%')
-
-                    stat_frame.update_idletasks()
-                    print(cpu_usage)
 
                     time.sleep(1)
                 
@@ -58,9 +53,55 @@ class SystemMonitor:
 
         
         def show_ram_info():
+            def ram_stat(): 
+                while True:
+                    vm = psutil.virtual_memory()
+                    avail = vm.available / 1000000
+                    avail = round(avail,2) 
+                    used = vm.used / 1000000
+                    used = round(used,2)
+                    usage = vm.percent
+
+                    ram_usage_progress['value']=usage
+                    mem_used_count.config(text=f'{used} MegaBytes')
+                    mem_avail_count.config(text=f'{avail} MegaBytes')
+                    ram_usage_label.config(text=f'RAM Usage : {usage}%')
+
+                    time.sleep(1)
+                
             for widget in stat_frame.winfo_children():
                 widget.destroy() # Remove all elements
 
+            total_mem = psutil.virtual_memory().total / 1000000
+            total_mem = round(total_mem,2)     
+
+            mem_label = tk.Label(stat_frame,text='Total Memory : ')
+            mem_count = tk.Label(stat_frame,text=f'{total_mem} MegaBytes')
+
+            mem_label.grid(row=0,column=0,padx=10,pady=10)
+            mem_count.grid(row=0,column=1,padx=10,pady=10)      
+
+            mem_avail_label = tk.Label(stat_frame,text='Available Memory : ')
+            mem_avail_count = tk.Label(stat_frame,text=f'0 MegaBytes')
+
+            mem_avail_label.grid(row=1,column=0,padx=10,pady=10)
+            mem_avail_count.grid(row=1,column=1,padx=10,pady=10)   
+
+            mem_used_label = tk.Label(stat_frame,text='Used Memory : ')
+            mem_used_count = tk.Label(stat_frame,text=f'0 MegaBytes')
+
+            mem_used_label.grid(row=2,column=0,padx=10,pady=10)
+            mem_used_count.grid(row=2,column=1,padx=10,pady=10)   
+
+            ram_usage_progress = ttk.Progressbar(stat_frame, orient="horizontal", length=200, mode="determinate")
+            ram_usage_progress["maximum"] = 100
+            ram_usage_progress.grid(row=3,pady=(20,3),padx=10,columnspan=2)
+
+            ram_usage_label = tk.Label(stat_frame,text=f'RAM Usage : ')
+            ram_usage_label.grid(row=4,padx=10,columnspan=2)
+
+            thread = threading.Thread(target=ram_stat)     
+            thread.start()
 
         def show_disk_info():
             for widget in stat_frame.winfo_children():
@@ -71,14 +112,15 @@ class SystemMonitor:
         root = tk.Tk()
         root.title('CPU Monitor')
         root.resizable(False,False)
-        root.geometry('720x480')
+        root.geometry('520x300')
 
         # Frames
-        btn_frame = tk.Frame(root,bg='red',width=240,height=480)
+        btn_frame = tk.Frame(root)
         btn_frame.grid(row=0, column=0, padx=10, pady=10)
 
-        stat_frame = tk.Frame(root,bg='lightblue',width=500,height=455)
+        stat_frame = tk.Frame(root)
         stat_frame.grid(row=0, column=1, padx=10, pady=10)
+
 
         # Basic buttons in btn_frame
         cpu_btn = tk.Button(btn_frame,text="Show CPU Information", command=show_cpu_info)
