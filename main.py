@@ -1,8 +1,8 @@
 import time
 import psutil
 import tkinter as tk
-import threading
 from tkinter import ttk
+import threading
 
 class SystemMonitor:
     def __init__(self) -> None:
@@ -103,16 +103,55 @@ class SystemMonitor:
             thread = threading.Thread(target=ram_stat)     
             thread.start()
 
-        def show_disk_info():
+        def show_nw_info():
+            def nw_stat(): 
+                while True:
+                    net_io = psutil.net_io_counters()
+
+                    bt_sent_count.config(text=f'Bytes Sent : {net_io.bytes_sent}')
+                    bt_rec_count.config(text=f'Bytes Received : {net_io.bytes_recv}')
+                    pct_sent_count.config(text=f'Packets Sent : {net_io.packets_sent}')
+                    pct_rec_count.config(text=f'Packets Received : {net_io.packets_recv}')
+
+                    time.sleep(1)
+                
             for widget in stat_frame.winfo_children():
                 widget.destroy() # Remove all elements
+
+            bt_sent_lbl = tk.Label(stat_frame,text='Bytes sent : ')
+            bt_sent_count = tk.Label(stat_frame)
+
+            bt_sent_lbl.grid(row=0,column=0,padx=10,pady=10)
+            bt_sent_count.grid(row=0,column=1,padx=10,pady=10)      
+
+            bt_rec_lbl = tk.Label(stat_frame,text='Bytes Received : ')
+            bt_rec_count = tk.Label(stat_frame)
+
+            bt_rec_lbl.grid(row=1,column=0,padx=10,pady=10)
+            bt_rec_count.grid(row=1,column=1,padx=10,pady=10)   
+
+            pct_sent_lbl = tk.Label(stat_frame,text='Packets Sent : ')
+            pct_sent_count = tk.Label(stat_frame)
+
+            pct_sent_lbl.grid(row=2,column=0,padx=10,pady=10)
+            pct_sent_count.grid(row=2,column=1,padx=10,pady=10)   
+
+            pct_rec_lbl = tk.Label(stat_frame,text='Packets Received : ')
+            pct_rec_count = tk.Label(stat_frame)
+
+            pct_rec_lbl.grid(row=3,column=0,padx=10,pady=10)
+            pct_rec_count.grid(row=3,column=1,padx=10,pady=10)   
+
+
+            thread = threading.Thread(target=nw_stat)     
+            thread.start()
 
 
         # window initialization
         root = tk.Tk()
         root.title('CPU Monitor')
         root.resizable(False,False)
-        root.geometry('520x300')
+        root.geometry('600x300')
 
         # Frames
         btn_frame = tk.Frame(root)
@@ -129,8 +168,8 @@ class SystemMonitor:
         ram_btn = tk.Button(btn_frame,text="Show RAM Information", command=show_ram_info)
         ram_btn.pack(anchor='w',pady=(40,10),padx=10)
 
-        disk_btn = tk.Button(btn_frame,text="Show Disk Information", command=show_disk_info)
-        disk_btn.pack(anchor='w',pady=(40,10),padx=10)
+        nw_btn = tk.Button(btn_frame,text="Show Network Information", command=show_nw_info)
+        nw_btn.pack(anchor='w',pady=(40,10),padx=10)
 
         root.mainloop()
 
