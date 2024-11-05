@@ -24,11 +24,14 @@ class SystemMonitor:
             for widget in stat_frame.winfo_children():
                 widget.destroy() # Remove all elements
 
+
+            cpu_count = psutil.cpu_count(logical=False)
+            log_cpu_count = psutil.cpu_count(logical=True)
             core_label = tk.Label(stat_frame,text='Physical CPU count : ')
-            core_count = tk.Label(stat_frame,text=f'{psutil.cpu_count(logical=False)}')
+            core_count = tk.Label(stat_frame,text=cpu_count)
 
             core_log_label = tk.Label(stat_frame,text='Logical CPU count : ')
-            core_log_count = tk.Label(stat_frame,text=f'{psutil.cpu_count(logical=True)}')
+            core_log_count = tk.Label(stat_frame,text=log_cpu_count)
 
             core_label.grid(row=0,column=0,padx=10,pady=10)
             core_count.grid(row=0,column=1,padx=10,pady=10)
