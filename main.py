@@ -7,6 +7,18 @@ import threading
 
 
 def show_cpu_info():
+
+    def cpu_stat(): 
+        while True:
+            freq = psutil.cpu_freq()[0]
+            freq = round(freq, 2)
+            freq_count.config(text=f'{freq} MHz')   
+
+            cpu_usage = psutil.cpu_percent()
+            cpu_usage_progress["value"] = cpu_usage
+            cpu_usage_label.config(text=f'CPU Usage : {cpu_usage}%')
+
+            time.sleep(1)   
         
     for widget in stat_frame.winfo_children():
         widget.destroy() # Remove all elements
@@ -41,20 +53,25 @@ def show_cpu_info():
     thread = threading.Thread(target=cpu_stat)     
     thread.start()    
 
-    def cpu_stat(): 
-        while True:
-            freq = psutil.cpu_freq()[0]
-            freq = round(freq, 2)
-            freq_count.config(text=f'{freq} MHz')   
-
-            cpu_usage = psutil.cpu_percent()
-            cpu_usage_progress["value"] = cpu_usage
-            cpu_usage_label.config(text=f'CPU Usage : {cpu_usage}%')
-
-            time.sleep(1)   
+    
 
 
 def show_ram_info():
+    def ram_stat(): 
+        while True:
+            vm = psutil.virtual_memory()
+            avail = vm.available / 1000000
+            avail = round(avail,2) 
+            used = vm.used / 1000000
+            used = round(used,2)
+            usage = vm.percent
+
+            ram_usage_progress['value']=usage
+            mem_used_count.config(text=f'{used} MegaBytes')
+            mem_avail_count.config(text=f'{avail} MegaBytes')
+            ram_usage_label.config(text=f'RAM Usage : {usage}%')
+
+            time.sleep(1)
         
     for widget in stat_frame.winfo_children():
         widget.destroy() # Remove all elements
@@ -90,23 +107,19 @@ def show_ram_info():
     thread = threading.Thread(target=ram_stat)     
     thread.start()
 
-    def ram_stat(): 
-        while True:
-            vm = psutil.virtual_memory()
-            avail = vm.available / 1000000
-            avail = round(avail,2) 
-            used = vm.used / 1000000
-            used = round(used,2)
-            usage = vm.percent
-
-            ram_usage_progress['value']=usage
-            mem_used_count.config(text=f'{used} MegaBytes')
-            mem_avail_count.config(text=f'{avail} MegaBytes')
-            ram_usage_label.config(text=f'RAM Usage : {usage}%')
-
-            time.sleep(1)
 
 def show_nw_info():
+
+    def nw_stat(): 
+        while True:
+            net_io = psutil.net_io_counters()
+
+            bt_sent_count.config(text=net_io.bytes_sent)
+            bt_rec_count.config(text=net_io.bytes_recv)
+            pct_sent_count.config(text=net_io.packets_sent)
+            pct_rec_count.config(text=net_io.packets_recv)
+
+            time.sleep(1)
         
     for widget in stat_frame.winfo_children():
         widget.destroy() # Remove all elements
@@ -138,17 +151,6 @@ def show_nw_info():
 
     thread = threading.Thread(target=nw_stat)     
     thread.start()
-
-    def nw_stat(): 
-        while True:
-            net_io = psutil.net_io_counters()
-
-            bt_sent_count.config(text=net_io.bytes_sent)
-            bt_rec_count.config(text=net_io.bytes_recv)
-            pct_sent_count.config(text=net_io.packets_sent)
-            pct_rec_count.config(text=net_io.packets_recv)
-
-            time.sleep(1)
 
 
 # window initialization
