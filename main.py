@@ -39,7 +39,7 @@ class SystemMonitor:
             core_log_count.grid(row=1,column=1,padx=10,pady=10)   
 
             freq_label = tk.Label(stat_frame,text='CPU Frequency : ')
-            freq_count = tk.Label(stat_frame,text=f'{psutil.cpu_freq()[0]} MHz')
+            freq_count = tk.Label(stat_frame,text=' MHz')
 
             freq_label.grid(row=2,column=0,padx=10,pady=10)
             freq_count.grid(row=2,column=1,padx=10,pady=10)       
@@ -48,7 +48,7 @@ class SystemMonitor:
             cpu_usage_progress["maximum"] = 100
             cpu_usage_progress.grid(row=3,pady=(20,3),padx=10,columnspan=2)
 
-            cpu_usage_label = tk.Label(stat_frame,text=f'CPU Usage : ')
+            cpu_usage_label = tk.Label(stat_frame,text='CPU Usage : ')
             cpu_usage_label.grid(row=4,padx=10,columnspan=2)
 
             thread = threading.Thread(target=cpu_stat)     
@@ -111,10 +111,10 @@ class SystemMonitor:
                 while True:
                     net_io = psutil.net_io_counters()
 
-                    bt_sent_count.config(text=f'Bytes Sent : {net_io.bytes_sent}')
-                    bt_rec_count.config(text=f'Bytes Received : {net_io.bytes_recv}')
-                    pct_sent_count.config(text=f'Packets Sent : {net_io.packets_sent}')
-                    pct_rec_count.config(text=f'Packets Received : {net_io.packets_recv}')
+                    bt_sent_count.config(text=net_io.bytes_sent)
+                    bt_rec_count.config(text=net_io.bytes_recv)
+                    pct_sent_count.config(text=net_io.packets_sent)
+                    pct_rec_count.config(text=net_io.packets_recv)
 
                     time.sleep(1)
                 
