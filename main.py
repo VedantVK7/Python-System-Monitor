@@ -163,13 +163,13 @@ class SystemMonitor:
 
         # Basic buttons in btn_frame
         cpu_btn = tk.Button(btn_frame,text="Show CPU Information", command=show_cpu_info)
-        cpu_btn.pack(anchor='w',pady=(40,10),padx=10)
+        cpu_btn.pack(pady=(40,10),padx=10)
 
         ram_btn = tk.Button(btn_frame,text="Show RAM Information", command=show_ram_info)
-        ram_btn.pack(anchor='w',pady=(40,10),padx=10)
+        ram_btn.pack(pady=(40,10),padx=10)
 
         nw_btn = tk.Button(btn_frame,text="Show Network Information", command=show_nw_info)
-        nw_btn.pack(anchor='w',pady=(40,10),padx=10)
+        nw_btn.pack(pady=(40,10),padx=10)
 
         root.mainloop()
 
