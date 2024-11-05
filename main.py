@@ -64,7 +64,10 @@ def show_ram_info():
             avail = round(avail,2) 
             used = vm.used / 1000000
             used = round(used,2)
-            usage = vm.percent
+
+            total_used = vm.total - vm.available
+            usage = total_used / vm.total * 100
+            usage = round(usage,2)
 
             ram_usage_progress['value']=usage
             mem_used_count.config(text=f'{used} MegaBytes')
