@@ -3,7 +3,44 @@ import psutil
 import tkinter as tk
 from tkinter import ttk
 import threading
+import subprocess
+import re
 
+def get_sensor_data():
+    # Run the `sensors` command and capture output
+    result = subprocess.run(['sensors'], capture_output=True, text=True)
+    output = result.stdout
+    
+    # Dictionary to store sensor data
+    sensor_data = {}
+    
+    # Parse the sensor data for temperatures and fan speeds
+    for line in output.splitlines():
+        
+        # Match fan speeds (any fan entry)
+        if "fan" in line:
+            # Match current fan speed and maximum fan speed (e.g., max = 5400 RPM)
+            match = re.search(r'fan(\d+):\s+(\d+)\s+RPM\s+\(min\s+=\s+\d+\s+RPM,\s+max\s+=\s+(\d+)\s+RPM\)', line)
+            if match:
+                fan_number = match.group(1)
+                fan_speed = int(match.group(2))  # Current fan speed
+                max_fan_speed = int(match.group(3))  # Maximum fan speed
+                
+                # Store fan speed with dynamic fan number
+                sensor_data[f'Fan {fan_number} Speed'] = fan_speed
+                # Store maximum fan speed
+                sensor_data[f'Fan {fan_number} Max Speed'] = max_fan_speed
+        
+        # Match CPU core temperatures (dynamically for any core)
+        if "Core" in line:
+            match = re.search(r'Core (\d+):\s+\+([\d.]+)°C', line)
+            if match:
+                core_number = match.group(1)
+                core_temp = float(match.group(2))
+                # Store core temperature with dynamic core number
+                sensor_data[f'CPU Core {core_number} Temperature'] = core_temp
+    
+    return sensor_data
 
 
 def show_cpu_info():
@@ -18,8 +55,15 @@ def show_cpu_info():
             cpu_usage_progress["value"] = cpu_usage
             cpu_usage_label.config(text=f'CPU Usage : {cpu_usage}%')
 
+            sensor_data = get_sensor_data()
+
+            print(sensor_data)
+
+
             time.sleep(1)   
-        
+    
+    # root.geometry('1000x300')
+
     for widget in stat_frame.winfo_children():
         widget.destroy() # Remove all elements
 
@@ -32,23 +76,40 @@ def show_cpu_info():
     core_log_label = tk.Label(stat_frame,text='Logical CPU count : ')
     core_log_count = tk.Label(stat_frame,text=log_cpu_count)
 
-    core_label.grid(row=0,column=0,padx=10,pady=10)
-    core_count.grid(row=0,column=1,padx=10,pady=10)
-    core_log_label.grid(row=1,column=0,padx=10,pady=10)
-    core_log_count.grid(row=1,column=1,padx=10,pady=10)   
+    core_label.grid(row=0,column=0,padx=10,pady=5)
+    core_count.grid(row=0,column=1,padx=10,pady=5)
+    core_log_label.grid(row=1,column=0,padx=10,pady=5)
+    core_log_count.grid(row=1,column=1,padx=10,pady=5)   
 
     freq_label = tk.Label(stat_frame,text='CPU Frequency : ')
     freq_count = tk.Label(stat_frame,text=' MHz')
 
-    freq_label.grid(row=2,column=0,padx=10,pady=10)
-    freq_count.grid(row=2,column=1,padx=10,pady=10)       
+    freq_label.grid(row=2,column=0,padx=10,pady=5)
+    freq_count.grid(row=2,column=1,padx=10,pady=5)       
+
+    temp_label = tk.Label(stat_frame,text='Fan Speed : ')
+    temp_count = tk.Label(stat_frame,text=' RPM')
+
+    fan_label = tk.Label(stat_frame,text='CPU Temprature : ')
+    fan_count = tk.Label(stat_frame,text=' °C')
+
+
+    temp_label.grid(row=3,column=0,padx=10,pady=5)
+    temp_count.grid(row=3,column=1,padx=10,pady=5)   
+
+
+    fan_label.grid(row=4,column=0,padx=10,pady=5)
+    fan_count.grid(row=4,column=1,padx=10,pady=5)   
 
     cpu_usage_progress = ttk.Progressbar(stat_frame, orient="horizontal", length=200, mode="determinate")
     cpu_usage_progress["maximum"] = 100
-    cpu_usage_progress.grid(row=3,pady=(20,3),padx=10,columnspan=2)
+    cpu_usage_progress.grid(row=5,pady=(20,3),padx=5,columnspan=2)
 
     cpu_usage_label = tk.Label(stat_frame,text='CPU Usage : ')
-    cpu_usage_label.grid(row=4,padx=10,columnspan=2)
+    cpu_usage_label.grid(row=6,padx=5,columnspan=2)
+
+    # Button for showing advance cpu information
+    
 
     thread = threading.Thread(target=cpu_stat)     
     thread.start()    
@@ -158,9 +219,9 @@ def show_nw_info():
 
 # window initialization
 root = tk.Tk()
-root.title('CPU Monitor')
+root.title('System Monitor')
 root.resizable(False,False)
-root.geometry('600x300')
+root.geometry('600x330')
 
 # Frames
 btn_frame = tk.Frame(root)
@@ -181,5 +242,3 @@ nw_btn = tk.Button(btn_frame,text="Show Network Information", command=show_nw_in
 nw_btn.pack(pady=(40,10),padx=10)
 
 root.mainloop()
-
-
