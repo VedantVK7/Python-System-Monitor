@@ -8,4 +8,5 @@ python -m pip install psutil<br />
 python -m pip install tkinter<br /><br />
 Ubuntu :<br />
 python3 -m pip install psutil<br />
-python3 -m pip install tkinter<br />
+sudo apt install python3-tk<br />
+sudo apt install lm-sensors <br/>
