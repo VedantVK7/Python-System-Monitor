@@ -68,6 +68,15 @@ def show_cpu_info():
             temp_count.config(text=f'{avg} °C')
             fan_count_lbl.config(text=f'{sensor_data["Fan 1 Speed"]} RPM')
 
+            speed = sensor_data[f'Fan 1 Speed']
+            max_speed = sensor_data[f'Fan 1 Max Speed']
+
+            if speed > max_speed : speed = max_speed
+
+            progress['value'] = speed
+            fan_count_lbl.config(text=f'{speed} RPM / {max_speed} RPM')  
+
+
             time.sleep(1)   
     
     def show_advanced():
@@ -84,9 +93,6 @@ def show_cpu_info():
         cols = 5
 
         root.geometry('650x800')
-        
-        lbl = tk.Label(stat_frame,text='Fan Speed : ')
-        lbl.grid(row=0,column=0,pady=20,columnspan=cols)
 
         cpu_arr = []
         cpu_lbl_arr = []
@@ -97,22 +103,6 @@ def show_cpu_info():
             if 'CPU Core' in key:
                 cpu_keys.append(key)
 
-        
-        cpu_lbl = tk.Label(stat_frame,text=f'Fan 1 : ')
-        cpu_lbl.grid(row=1,column=0,padx=10,pady=5,columnspan=2)
-
-        speed = sensor_data[f'Fan 1 Speed']
-        max_speed = sensor_data[f'Fan 1 Max Speed']
-
-        if speed > max_speed : speed = max_speed
-
-        progress = ttk.Progressbar(stat_frame, orient="horizontal", length=120, mode="determinate")
-        progress["maximum"] = max_speed
-        progress['value'] = speed
-        progress.grid(row=1,column=2,padx=10,pady=10,columnspan=3)
-
-        fan_lbl = tk.Label(stat_frame,text=f'{speed} RPM')
-        fan_lbl.grid(row=3,column=0,padx=5,pady=5,columnspan=cols)
 
         lbl = tk.Label(stat_frame,text='CPU Tempratures : ')
         lbl.grid(row=4,column=0,pady=(30,20),columnspan=cols)
@@ -148,14 +138,6 @@ def show_cpu_info():
 
                 sensor_data = get_sensor_data()
 
-                speed = sensor_data[f'Fan 1 Speed']
-                max_speed = sensor_data[f'Fan 1 Max Speed']
-
-                if speed > max_speed : speed = max_speed
-
-                progress['value'] = speed
-                fan_lbl.config(text=f'{speed} RPM')  
-
                 for i in range(len(cpu_keys)):
                     temp = sensor_data[cpu_keys[i]]
 
@@ -170,6 +152,8 @@ def show_cpu_info():
 
     for widget in stat_frame.winfo_children():
         widget.destroy() # Remove all elements
+    
+    sensor_data = get_sensor_data()
 
     cpu_count = psutil.cpu_count(logical=False)
     log_cpu_count = psutil.cpu_count(logical=True)
@@ -191,29 +175,38 @@ def show_cpu_info():
     freq_count_lbl.grid(row=2,column=1,padx=10,pady=5)       
 
     temp_label = tk.Label(stat_frame,text='CPU Temprature : ')
-    temp_count = tk.Label(stat_frame,text=' RPM')
-
-    fan_label = tk.Label(stat_frame,text='Fan Speed : ')
-    fan_count_lbl = tk.Label(stat_frame,text=' °C')
+    temp_count = tk.Label(stat_frame,text=' °C')
 
 
     temp_label.grid(row=3,column=0,padx=10,pady=5)
-    temp_count.grid(row=3,column=1,padx=10,pady=5)   
+    temp_count.grid(row=3,column=1,padx=10,pady=5)    
 
-
+    fan_label = tk.Label(stat_frame,text='Fan Speed : ')
     fan_label.grid(row=4,column=0,padx=10,pady=5)
-    fan_count_lbl.grid(row=4,column=1,padx=10,pady=5)   
+
+    speed = sensor_data[f'Fan 1 Speed']
+    max_speed = sensor_data[f'Fan 1 Max Speed']
+
+    if speed > max_speed : speed = max_speed
+
+    progress = ttk.Progressbar(stat_frame, orient="horizontal", length=80, mode="determinate")
+    progress["maximum"] = max_speed
+    progress['value'] = speed
+    progress.grid(row=4,column=1,padx=10,pady=5)
+
+    fan_count_lbl = tk.Label(stat_frame,text=' RPM')
+    fan_count_lbl.grid(row=5,column=0,padx=10,pady=5,columnspan=2)  
 
     cpu_usage_progress = ttk.Progressbar(stat_frame, orient="horizontal", length=200, mode="determinate")
     cpu_usage_progress["maximum"] = 100
-    cpu_usage_progress.grid(row=5,pady=(20,3),padx=5,columnspan=2)
+    cpu_usage_progress.grid(row=6,pady=(10,3),padx=5,columnspan=2)
 
     cpu_usage_label = tk.Label(stat_frame,text='CPU Usage : ')
-    cpu_usage_label.grid(row=6,padx=5,columnspan=2)
+    cpu_usage_label.grid(row=7,padx=5,columnspan=2)
 
     # Button for showing advance cpu information
     advance_btn = tk.Button(stat_frame,text='Advanced',command=show_advanced)
-    advance_btn.grid(row=7,column=0,columnspan=2,pady=5)
+    advance_btn.grid(row=8,column=0,columnspan=2,pady=5)
 
     thread = threading.Thread(target=cpu_stat)     
     thread.start()    
