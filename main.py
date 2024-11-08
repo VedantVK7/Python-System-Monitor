@@ -13,7 +13,6 @@ def get_sensor_data():
     output = result.stdout
         
     sensor_data = {}
-    fan_count = 0
         
     for line in output.splitlines():
                 
@@ -21,7 +20,6 @@ def get_sensor_data():
             match = re.search(r'fan(\d+):\s+(\d+)\s+RPM\s+\(min\s+=\s+\d+\s+RPM,\s+max\s+=\s+(\d+)\s+RPM\)', line)
             if match:
                 fan_number = match.group(1)
-                fan_count += 1
                 fan_speed = int(match.group(2))  # Current fan speed
                 max_fan_speed = int(match.group(3))  # Maximum fan speed
                                 
@@ -34,7 +32,6 @@ def get_sensor_data():
                 core_number = match.group(1)
                 core_temp = float(match.group(2))                
                 sensor_data[f'CPU Core {core_number} Temperature'] = core_temp
-        sensor_data['Fan Count'] = fan_count        
     return sensor_data
 
 
@@ -46,7 +43,7 @@ def show_cpu_info():
         while True and started:
             freq = psutil.cpu_freq()[0]
             freq = round(freq, 2)
-            freq_count.config(text=f'{freq} MHz')   
+            freq_count_lbl.config(text=f'{freq} MHz')   
 
             cpu_usage = psutil.cpu_percent()
             cpu_usage_progress["value"] = cpu_usage
@@ -56,8 +53,15 @@ def show_cpu_info():
 
             sum = 0
 
-            for i in range(cpu_count):
-                sum += sensor_data[f'CPU Core {i} Temperature']
+            cpu_keys = []
+
+            for key in sensor_data.keys():
+                if 'CPU Core' in key:
+                    cpu_keys.append(key)
+
+
+            for i in cpu_keys:
+                sum += sensor_data[i]
 
             avg = round(sum / cpu_count,1)
 
@@ -76,58 +80,67 @@ def show_cpu_info():
 
         started = True
         sensor_data = get_sensor_data()
-        fan_count = sensor_data["Fan Count"]
 
-        cols = fan_count if fan_count > cpu_count else cpu_count
+        cols = 5
 
-        root.geometry('600x500')
+        root.geometry('650x800')
         
         lbl = tk.Label(stat_frame,text='Fan Speed : ')
         lbl.grid(row=0,column=0,pady=20,columnspan=cols)
 
-        fan_arr = []
-        fan_lbl_arr = []
         cpu_arr = []
         cpu_lbl_arr = []
 
-        for i in range(fan_count):
-            cpu_lbl = tk.Label(stat_frame,text=f'Fan {i}')
-            cpu_lbl.grid(row=1,column=i,padx=10,pady=5)
+        cpu_keys = []
 
-            speed = sensor_data[f'Fan {i + 1} Speed']
-            max_speed = sensor_data[f'Fan {i + 1} Max Speed']
+        for key in sensor_data.keys():
+            if 'CPU Core' in key:
+                cpu_keys.append(key)
 
-            if speed > max_speed : speed = max_speed
+        
+        cpu_lbl = tk.Label(stat_frame,text=f'Fan 1 : ')
+        cpu_lbl.grid(row=1,column=0,padx=10,pady=5,columnspan=2)
 
-            progress = ttk.Progressbar(stat_frame, orient="vertical", length=80, mode="determinate")
-            progress["maximum"] = max_speed
-            progress['value'] = speed
-            progress.grid(row=2,column=i,padx=10,pady=10)
-            fan_arr.append(progress)
+        speed = sensor_data[f'Fan 1 Speed']
+        max_speed = sensor_data[f'Fan 1 Max Speed']
 
-            fan_lbl = tk.Label(stat_frame,text=f'{speed} RPM')
-            fan_lbl.grid(row=3,column=i,padx=5,pady=5)
-            fan_lbl_arr.append(fan_lbl)
+        if speed > max_speed : speed = max_speed
+
+        progress = ttk.Progressbar(stat_frame, orient="horizontal", length=120, mode="determinate")
+        progress["maximum"] = max_speed
+        progress['value'] = speed
+        progress.grid(row=1,column=2,padx=10,pady=10,columnspan=3)
+
+        fan_lbl = tk.Label(stat_frame,text=f'{speed} RPM')
+        fan_lbl.grid(row=3,column=0,padx=5,pady=5,columnspan=cols)
 
         lbl = tk.Label(stat_frame,text='CPU Tempratures : ')
         lbl.grid(row=4,column=0,pady=(30,20),columnspan=cols)
 
-        for i in range(cpu_count):
+        r = 5
+        c = 0
+
+        for i in range(len(cpu_keys)):
 
             cpu_lbl = tk.Label(stat_frame,text=f'CPU {i}')
-            cpu_lbl.grid(row=5,column=i,padx=10,pady=5)
+            cpu_lbl.grid(row=r,column=c,padx=10,pady=5)
 
-            temp = sensor_data[f'CPU Core {i} Temperature']
+            temp = sensor_data[cpu_keys[i]]
 
             temp_progress = ttk.Progressbar(stat_frame, orient="vertical", length=80, mode="determinate")
             temp_progress["maximum"] = 100
             temp_progress['value'] = temp
-            temp_progress.grid(row=6,column=i,padx=10,pady=10)
+            temp_progress.grid(row=r+1,column=c,padx=10,pady=10)
             cpu_arr.append(temp_progress)
 
             temp_lbl = tk.Label(stat_frame,text=f'{temp} °C')
-            temp_lbl.grid(row=7,column=i,padx=5,pady=5)
+            temp_lbl.grid(row=r+2,column=c,padx=5,pady=5)
             cpu_lbl_arr.append(temp_lbl)
+
+            c += 1
+            if((i+1) % 5 == 0):
+                r += 3
+                c = 0
 
         def advance_stat():
 
@@ -135,17 +148,16 @@ def show_cpu_info():
 
                 sensor_data = get_sensor_data()
 
-                for i in range(fan_count):
-                    speed = sensor_data[f'Fan {i + 1} Speed']
-                    max_speed = sensor_data[f'Fan {i + 1} Max Speed']
+                speed = sensor_data[f'Fan 1 Speed']
+                max_speed = sensor_data[f'Fan 1 Max Speed']
 
-                    if speed > max_speed : speed = max_speed
+                if speed > max_speed : speed = max_speed
 
-                    fan_arr[i]['value'] = speed
-                    fan_lbl_arr[i].config(text=f'{speed} RPM')
+                progress['value'] = speed
+                fan_lbl.config(text=f'{speed} RPM')  
 
-                for i in range(cpu_count):
-                    temp = sensor_data[f'CPU Core {i} Temperature']
+                for i in range(len(cpu_keys)):
+                    temp = sensor_data[cpu_keys[i]]
 
                     cpu_arr[i]['value'] = temp
                     cpu_lbl_arr[i].config(text=f'{temp} °C')
@@ -173,10 +185,10 @@ def show_cpu_info():
     core_log_count.grid(row=1,column=1,padx=10,pady=5)   
 
     freq_label = tk.Label(stat_frame,text='CPU Frequency : ')
-    freq_count = tk.Label(stat_frame,text=' MHz')
+    freq_count_lbl = tk.Label(stat_frame,text=' MHz')
 
     freq_label.grid(row=2,column=0,padx=10,pady=5)
-    freq_count.grid(row=2,column=1,padx=10,pady=5)       
+    freq_count_lbl.grid(row=2,column=1,padx=10,pady=5)       
 
     temp_label = tk.Label(stat_frame,text='CPU Temprature : ')
     temp_count = tk.Label(stat_frame,text=' RPM')
