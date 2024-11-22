@@ -66,15 +66,19 @@ def show_cpu_info():
             avg = round(sum / cpu_count,1)
 
             temp_count.config(text=f'{avg} °C')
-            fan_count_lbl.config(text=f'{sensor_data["Fan 1 Speed"]} RPM')
+            try:
+                fan_count_lbl.config(text=f'{sensor_data["Fan 1 Speed"]} RPM')
+            
 
-            speed = sensor_data[f'Fan 1 Speed']
-            max_speed = sensor_data[f'Fan 1 Max Speed']
+                speed = sensor_data[f'Fan 1 Speed']
+                max_speed = sensor_data[f'Fan 1 Max Speed']
 
-            if speed > max_speed : speed = max_speed
+                if speed > max_speed : speed = max_speed
 
-            progress['value'] = speed
-            fan_count_lbl.config(text=f'{speed} RPM / {max_speed} RPM')  
+                progress['value'] = speed
+                fan_count_lbl.config(text=f'{speed} RPM / {max_speed} RPM')  
+            except Exception:
+                pass
 
 
             time.sleep(1)   
@@ -174,28 +178,32 @@ def show_cpu_info():
     freq_label.grid(row=2,column=0,padx=10,pady=5)
     freq_count_lbl.grid(row=2,column=1,padx=10,pady=5)       
 
-    temp_label = tk.Label(stat_frame,text='CPU Temprature : ')
+    temp_label = tk.Label(stat_frame,text='CPU Temperature : ')
     temp_count = tk.Label(stat_frame,text=' °C')
 
 
     temp_label.grid(row=3,column=0,padx=10,pady=5)
     temp_count.grid(row=3,column=1,padx=10,pady=5)    
 
-    fan_label = tk.Label(stat_frame,text='Fan Speed : ')
-    fan_label.grid(row=4,column=0,padx=10,pady=5)
+    try:
+        speed = sensor_data[f'Fan 1 Speed']
+        max_speed = sensor_data[f'Fan 1 Max Speed']
 
-    speed = sensor_data[f'Fan 1 Speed']
-    max_speed = sensor_data[f'Fan 1 Max Speed']
+        if speed > max_speed : speed = max_speed
 
-    if speed > max_speed : speed = max_speed
+        progress = ttk.Progressbar(stat_frame, orient="horizontal", length=80, mode="determinate")
+        progress["maximum"] = max_speed
+        progress['value'] = speed
+        progress.grid(row=4,column=1,padx=10,pady=5)
+        
+        fan_label = tk.Label(stat_frame,text='Fan Speed : ')
+        fan_label.grid(row=4,column=0,padx=10,pady=5)
 
-    progress = ttk.Progressbar(stat_frame, orient="horizontal", length=80, mode="determinate")
-    progress["maximum"] = max_speed
-    progress['value'] = speed
-    progress.grid(row=4,column=1,padx=10,pady=5)
-
-    fan_count_lbl = tk.Label(stat_frame,text=' RPM')
-    fan_count_lbl.grid(row=5,column=0,padx=10,pady=5,columnspan=2)  
+        fan_count_lbl = tk.Label(stat_frame,text=' RPM')
+        fan_count_lbl.grid(row=5,column=0,padx=10,pady=5,columnspan=2)  
+        
+    except Exception:
+        pass
 
     cpu_usage_progress = ttk.Progressbar(stat_frame, orient="horizontal", length=200, mode="determinate")
     cpu_usage_progress["maximum"] = 100
